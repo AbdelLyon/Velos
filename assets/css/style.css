@@ -1,0 +1,113 @@
+.app{
+   min-height: 100vh;
+}
+
+#link-cocktails,
+#link-addCocktail,
+#link-addComment,
+#link-deleteComment,
+#link-editeCocktail,
+#link-deleteCocktail,
+#link-register{
+   position: relative;
+   display: flex;
+   justify-content: center;
+}
+
+.hidden{
+   display: none;
+}
+
+
+.visible{
+   display: block;
+   position: absolute;
+   top: 30px;
+   width: 115px;
+   font-size: 13px;
+   text-align: center;
+   background: #0000007c;
+   color: #fff;
+   padding: 5px 0;
+   border-radius: 3px;
+   font-weight: 700;
+
+   
+}
+
+main{
+   width: 90%;
+   margin: 0 auto;
+}
+
+.page-content{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex-wrap: wrap;
+   }
+
+.logo{
+   font-family: 'Vujahday Script', cursive;
+}
+
+.list{
+   color: inherit;
+   text-decoration: none;
+   cursor: pointer;
+   transition: all 0.3s;
+   border: none;
+   width: 320px;
+   margin: 20px;
+   padding: 10px;
+   box-shadow: 0 2px 5px #8f8f8f60;
+}
+
+
+.content-comments-cocktail{
+   overflow-x: hidden ;
+}
+
+
+.show{
+   animation: title 0.8s ease-out both;
+   
+   
+}
+
+@keyframes title {
+   from {
+      height: 0;
+      overflow-y: scroll ;
+   } 
+   to { 
+      height: 450px;
+     }  
+}
+
+
+.list-comment{
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   border-bottom: 1px solid #8f8f8f60;
+   margin: 20px 0;
+   padding: 10px;
+   box-shadow: 0 2px 5px #8f8f8f60;   
+   background: #fff;
+}
+
+
+img{
+   border-radius: 5px;
+}
+
+.list:hover{
+   transform: scale(1.03);
+   color: inherit;
+}
+
+
+footer{
+   background: #3d4041;
+}
