@@ -23,25 +23,34 @@ class User extends AbstractController
       $displayName = null;
 
       if ($_SERVER['REQUEST_METHOD'] === "POST") {
-         if ((!empty($_POST['username'])))  $username = htmlspecialchars($_POST['username']);
+         if (!empty($_POST['username']))  $username = htmlspecialchars($_POST['username']);
          if (!empty($_POST['email'])) $email = htmlspecialchars($_POST['email']);
          if (!empty($_POST['password'])) $password = htmlspecialchars($_POST['password']);
          if (!empty($_POST['display_name'])) $displayName = htmlspecialchars($_POST['display_name']);
 
-         if (!$username  || !$email || !$password || !$displayName) {
+         if (!$username || !$email || !$password || !$displayName) {
             $this->error = 'Veuillez renseigner tous les champs!';
          } else {
-            $user = $this->model->fetchOneUser($username);
-            if ($user) {
+            $userModel = new ModelUser;
+            $users = $userModel->findAll();
+
+            //vérifier si usename ou emeil existe dans bd
+            $user = \array_filter($users, fn ($user) => $user->getUsername() === $username || $user->getEmail() === $email);
+            if (!empty($user)) {
                $this->error = 'utilisateur existe dejà!';
             } else {
-               if (!$user) $this->error;
-               $user = new ModelUser();
-               $user->setUserName($username);
-               $user->setEmail($email);
-               $user->setPassword($password);
-               $user->setDisplayName($displayName);
-               $user = $user->register($user);
+
+               $modelUser = new ModelUser();
+               $modelUser->setUserName($username);
+               $modelUser->setEmail($email);
+               $modelUser->setPassword($password);
+               $modelUser->setDisplayName($displayName);
+               $modelUser->register($modelUser);
+
+               // connecter l'utilisateur uen foi enrgesté dans la bd
+               $this->signIn();
+
+               $this->redirect();
             }
          }
       }
@@ -66,7 +75,7 @@ class User extends AbstractController
          if (!$username || !$password) {
             $this->error = 'Veuillez renseigner tous les champs!';
          } else {
-            $user = $this->model->fetchOneUser($username);
+            $user = $this->model->findOneUser($username);
             if (!$user) {
                $this->error = 'utilisateur et\ou mot de passe incorrect';
             } else {

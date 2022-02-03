@@ -21,18 +21,21 @@
       <nav class="navbar navbar-expand-sm navbar-primary bg-white shadow px-5 d-flex">
         <a class="flex-fill navbar-brand" href="/"><i class="fas fa-biking"></i></a>
         <ul class="navbar-nav me-auto mb-2">
-          <a id="link-register" class="nav-link me-5" href="/?type=user&action=signup"><i class="fas fa-user-plus fs-6"></i>
-            <p class="link-register hidden">Inscription</p>
-          </a>
-          <a id="link-register" class="nav-link me-5" href="/?type=user&action=signin"><i class="fas fa-sign-in-alt fs-6"></i>
-            <p class="link-register hidden">Connexion</p>
-          </a>
-          <a id="link-register" class="nav-link me-5" href="/?type=user&action=signout"><i class="fas fa-sign-out-alt fs-6"></i>
-            <p class="link-register hidden">Déconnexion</p>
-          </a>
-          <a id="link-addCocktail" class="nav-link" href="/?type=velo&action=new"><i class="far fa-plus-square fs-6"></i>
-            <p class="link-addCocktail hidden">Ajouter cocltail</p>
-          </a>
+          <?php if (!Models\User::findCurrentUser()) : ?>
+            <a id="link-register" class="nav-link me-5" href="/?type=user&action=signup"><i class="fas fa-user-plus fs-6"></i>
+              <p class="link-register hidden">Inscription</p>
+            </a>
+            <a id="link-addCocktail" class="nav-link me-5" href="/?type=user&action=signin"><i class="fas fa-sign-in-alt fs-6"></i>
+              <p class="link-addCocktail hidden">Connexion</p>
+            </a>
+          <?php else : ?>
+            <a id="link-register" class="nav-link me-5" href="/?type=user&action=signout"><i class="fas fa-sign-out-alt fs-6"></i>
+              <p class="link-register hidden">Déconnexion</p>
+            </a>
+            <a id="link-addCocktail" class="nav-link" href="/?type=velo&action=new"><i class="far fa-plus-square fs-6"></i>
+              <p class="link-addCocktail hidden">Ajouter cocltail</p>
+            </a>
+          <?php endif ?>
         </ul>
       </nav>
     </header>

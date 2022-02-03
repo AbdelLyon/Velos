@@ -12,10 +12,10 @@ class User extends AbstractModel
    private $username;
    private $password;
    private $email;
-   private $displayName;
+   private $display_name;
 
    private \PDOStatement $statementCreateUser;
-   // private \PDOStatement $statementGetOneUser;
+   private \PDOStatement $statementGetOneUser;
    // private \PDOStatement $statementUpdateUser;
    // private \PDOStatement $statementGetAllUser;
    private \PDOStatement $statementSession;
@@ -27,57 +27,58 @@ class User extends AbstractModel
       parent::__construct();
 
       $this->statementCreateUser = $this->pdo->prepare("INSERT INTO $this->table VALUES (DEFAULT, :username, :email, :password, :display_name)");
-      $this->statementUpdateUser = $this->pdo->prepare("UPDATE $this->table SET username=:username, email=:email, password=:password WHERE id=:id");
+      // $this->statementUpdateUser = $this->pdo->prepare("UPDATE $this->table SET username=:username, email=:email, password=:password WHERE id=:id");
       $this->statementGetOneUser = $this->pdo->prepare("SELECT * FROM $this->table WHERE username=:username");
       $this->statementSession = $this->pdo->prepare("INSERT INTO session VALUES (:id,:userid)");
       $this->deleteStatementSession = $this->pdo->prepare("DELETE FROM session WHERE id=:id");
       $this->GetStatementSession = $this->pdo->prepare("SELECT * FROM session JOIN $this->table  on users.id=session.userid WHERE session.id=:id");
    }
 
-   public function getId()
+   public function getId(): ?int
    {
       return $this->id;
    }
 
-   public function getUsername()
+   public function getUsername(): ?string
    {
       return $this->username;
    }
 
-   public function setUsername($username): void
+   public function setUsername(string $username): void
    {
       $this->username = $username;
    }
 
-   public function getPassword()
+   public function getPassword(): ?string
    {
       return $this->password;
    }
 
-   public function setPassword($password): void
+   public function setPassword(string $password): void
    {
       $this->password = password_hash($password, PASSWORD_DEFAULT);
    }
 
-   public function getEmail()
+   public function getEmail(): ?string
    {
       return $this->email;
    }
 
-   public function setEmail($email): void
+   public function setEmail(string $email): void
    {
       $this->email = $email;
    }
 
-   public function getDisplayName()
+   public function getDisplayName(): ?string
    {
-      return $this->displayName;
+      return $this->display_name;
    }
 
-   public function setDisplayName($displayName): void
+   public function setDisplayName(string $display_name): void
    {
-      $this->displayName = $displayName;
+      $this->display_name = $display_name;
    }
+
 
    /**
     * creer un utilisateur
@@ -85,8 +86,9 @@ class User extends AbstractModel
     * @return User|bool 
     */
 
-   public function register(User $user): User | bool
+   public function register(User $user): void
    {
+
       $this->statementCreateUser->execute([
          ':username' => $user->getUsername(),
          ':email' => $user->getEmail(),
@@ -94,7 +96,7 @@ class User extends AbstractModel
          ':display_name' => $user->getDisplayName()
       ]);
 
-      return $this->findById($this->pdo->lastInsertId());
+      // return $this->findById($this->pdo->lastInsertId());
    }
 
 
@@ -104,23 +106,12 @@ class User extends AbstractModel
     * @return User|bool 
     */
 
-   public function fetchOneUser(string $username): User | bool
+   public function findOneUser(string $username): User | bool
    {
       $this->statementGetOneUser->execute([":username" => $username]);
       $this->statementGetOneUser->setFetchMode(\PDO::FETCH_CLASS, get_class($this));
       return $this->statementGetOneUser->fetch();
    }
-
-
-   // public function update(array $user): void
-   // {
-   //    $this->statementUpdateUser->bindValue(':username', $user['username']);
-   //    $this->statementUpdateUser->bindValue(':email', $user['email']);
-   //    $this->statementUpdateUser->bindValue(':password', $user['password']);
-   //    $this->statementUpdateUser->bindValue(':display_name', $user['display_name']);
-   //    $this->statementUpdateUser->bindValue(':id', $user['id']);
-   //    $this->statementUpdateUser->execute();
-   // }
 
    public function login(string $userId): void
    {
@@ -132,19 +123,22 @@ class User extends AbstractModel
       $signature = hash_hmac('sha256', $sessionId, 'majax');
       setcookie('session', $sessionId, time() + 60 * 60 * 24 * 14, '/', '', false, true);
       setcookie('signature', $signature, time() + 60 * 60 * 24 * 14, '/', '', false, true);
+      return;
    }
 
 
 
-   function isLoggedIn(): bool | object
+   static function findCurrentUser(): bool | User
    {
       $sessionId = $_COOKIE['session'] ?? '';
       $signature = $_COOKIE['signature'] ?? '';
       if ($sessionId && $signature) {
          $hash = hash_hmac('sha256', $sessionId, 'majax');
          if (hash_equals($hash, $signature)) {
-            $this->GetStatementSession->execute([':id' => $sessionId]);
-            $user =  $this->GetStatementSession->fetch();
+            $user = new User;
+            $user->GetStatementSession->execute([':id' => $sessionId]);
+            $user->GetStatementSession->setFetchMode(\PDO::FETCH_CLASS, get_class($user));
+            $user =  $user->GetStatementSession->fetch();
          }
       }
       return $user ?? false;
@@ -156,4 +150,14 @@ class User extends AbstractModel
       setcookie('session', "", time() - 1, '/');
       setcookie('signature', "", time() - 1, '/');
    }
+
+   // public function update(array $user): void
+   // {
+   //    $this->statementUpdateUser->bindValue(':username', $user['username']);
+   //    $this->statementUpdateUser->bindValue(':email', $user['email']);
+   //    $this->statementUpdateUser->bindValue(':password', $user['password']);
+   //    $this->statementUpdateUser->bindValue(':displayname', $user['displayname']);
+   //    $this->statementUpdateUser->bindValue(':id', $user['id']);
+   //    $this->statementUpdateUser->execute();
+   // }
 }

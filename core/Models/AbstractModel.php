@@ -37,7 +37,7 @@ class AbstractModel
 
    public function findById(int $id): object | bool
    {
-      $this->statementFindById->execute(["id" => $id]);
+      $this->statementFindById->execute([":id" => $id]);
       $this->statementFindById->setFetchMode(\PDO::FETCH_CLASS, get_class($this));
       return $this->statementFindById->fetch();
    }
@@ -50,7 +50,7 @@ class AbstractModel
 
    public function remove(int $id): void
    {
-      $this->statementRemove->execute(["id" => $id]);
+      $this->statementRemove->execute([":id" => $id]);
    }
 
    /**

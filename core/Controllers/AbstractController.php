@@ -21,4 +21,9 @@ abstract class AbstractController
    {
       return \App\View::render($template, $donnees);
    }
+
+   public function getUser()
+   {
+      return \Models\User::findCurrentUser();
+   }
 }

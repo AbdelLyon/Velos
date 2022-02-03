@@ -18,13 +18,6 @@ class Velo extends AbstractController
 
    public function index(): void
    {
-
-      $user = new User();
-      $userConected = $user->isLoggedIn();
-
-      \var_dump($userConected);
-
-
       $velos = $this->model->findAll();
       $pageTitle = "Accueil";
       $this->render("velos/index", compact('pageTitle', 'velos'));
@@ -53,23 +46,29 @@ class Velo extends AbstractController
 
          if (!$file->isImage()) $this->redirect(["action" => "new"]);
 
+         $author = $this->getUser();
+
          $velo = new ModelVelo();
 
          $velo->setName($name);
          $velo->setDescription($description);
          $velo->setImage($file->getNameFile());
          $velo->setPrice($price);
+         $velo->setAuthor($author->getId());
+
+
 
          $id = $this->model->insert([
             "name" => $velo->getName(),
-            "description" => $velo->getDescription($description),
-            "image" => $velo->getImage($file->getNameFile()),
-            "price" => $velo->getPrice($price)
+            "description" => $velo->getDescription(),
+            "image" => $velo->getImage(),
+            "price" => $velo->getPrice(),
+            'userid' => $velo->getAuthor()
          ]);
 
          $this->redirect([
             "action" => "show",
-            "id" => $id
+            "id" => $id,
          ]);
       };
 
@@ -93,11 +92,16 @@ class Velo extends AbstractController
 
       if (!$velo) $this->redirect();
 
+      $modelUser = new User;
+
+      $author = $modelUser->findById($velo->getAuthor());
+
+
       $modelAvis = new Avis();
       $avis =  $modelAvis->findAllByVelo($id);
       $pageTitle = $velo->getName();
 
-      $this->render("velos/show", compact('pageTitle', 'velo', 'avis'));
+      $this->render("velos/show", compact('pageTitle', 'velo', 'avis', 'author'));
    }
 
 

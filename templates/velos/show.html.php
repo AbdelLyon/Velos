@@ -22,6 +22,7 @@
             <p class="link-editeCocktail hidden">Modifier</p>
          </a>
       </div>
+      <p>Ajouté par: <?= $author->getDisplayName() ?></p>
    </div>
 </div>
 

@@ -10,6 +10,7 @@ class Velo extends AbstractModel
    private string $description;
    private string $image;
    private int $price;
+   private int $userid;
 
    public function getId(): ?int
    {
@@ -54,6 +55,16 @@ class Velo extends AbstractModel
    public function setPrice(string $price): void
    {
       $this->price = $price;
+   }
+
+   public function getAuthor(): ?int
+   {
+      return $this->userid;
+   }
+
+   public function setAuthor(int $userid): void
+   {
+      $this->userid = $userid;
    }
 
    /**
