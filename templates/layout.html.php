@@ -33,7 +33,7 @@
               <p class="link-register hidden">Déconnexion</p>
             </a>
             <a id="link-addCocktail" class="nav-link" href="/?type=velo&action=new"><i class="far fa-plus-square fs-6"></i>
-              <p class="link-addCocktail hidden">Ajouter cocltail</p>
+              <p class="link-addCocktail hidden">Ajouter vélo</p>
             </a>
           <?php endif ?>
         </ul>

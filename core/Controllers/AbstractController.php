@@ -2,14 +2,20 @@
 
 namespace Controllers;
 
+use App\Request;
+
 abstract class AbstractController
 {
    protected object $model;
    protected string $modelName;
+   protected object $request;
+   // protected string $requestName;
+
 
    public function __construct()
    {
       $this->model = new $this->modelName();
+      $this->request = new Request();
    }
 
    public function redirect(?array $url = null)
@@ -25,5 +31,10 @@ abstract class AbstractController
    public function getUser()
    {
       return \Models\User::findCurrentUser();
+   }
+
+   public function json($response)
+   {
+      return \App\Response::json($response);
    }
 }

@@ -4,7 +4,6 @@ namespace Controllers;
 
 use App\File;
 use Models\Avis;
-use Models\User;
 use Models\Velo as ModelVelo;
 
 class Velo extends AbstractController
@@ -23,6 +22,29 @@ class Velo extends AbstractController
       $this->render("velos/index", compact('pageTitle', 'velos'));
    }
 
+   public function indexApi(): void
+   {
+      $this->json($this->model->findAll());
+   }
+
+
+
+   public function showApi(): void
+   {
+
+      $id = $this->request->get('id');
+
+      // if (!empty($_GET['id']) && ctype_digit($_GET['id'])) $id = $_GET['id'];
+      if (!$id) $this->redirect();
+
+      $velo = $this->model->findById($id);
+
+      if (!$velo) $this->redirect();
+
+      $this->json($this->model->findById($id));
+   }
+
+
    /**
     * creer un vélo 
     * @return void
@@ -31,15 +53,13 @@ class Velo extends AbstractController
    public function new(): void
    {
 
-      $name = null;
-      $description = null;
-      $price = null;
+      $name = $this->request->post("name");
+      $description = $this->request->post("description");
+      $price = $this->request->post("price");
+      $image = $this->request->file("image");
 
-      if (!empty($_POST['name'])) $name = htmlspecialchars($_POST['name']);
-      if (!empty($_POST['description'])) $description = htmlspecialchars($_POST['description']);
-      if (!empty($_POST['price']) && ctype_digit($_POST['price']))  $price = $_POST['price'];
+      if ($name && $description && $price && $image) {
 
-      if ($name && $description && $price && !empty($_FILES['image'])) {
 
          $file = new File("image");
          $file->upload();
@@ -56,19 +76,17 @@ class Velo extends AbstractController
          $velo->setPrice($price);
          $velo->setAuthor($author->getId());
 
-
-
-         $id = $this->model->insert([
+         $newVelo = $this->model->insert([
             "name" => $velo->getName(),
             "description" => $velo->getDescription(),
             "image" => $velo->getImage(),
             "price" => $velo->getPrice(),
-            'userid' => $velo->getAuthor()
+            'userid' => $velo->getAuthor()->getId()
          ]);
 
          $this->redirect([
             "action" => "show",
-            "id" => $id,
+            "id" => $newVelo->getId(),
          ]);
       };
 
@@ -83,27 +101,22 @@ class Velo extends AbstractController
 
    public function show(): void
    {
-      $id = null;
+      $id = $this->request->get('id');
 
-      if (!empty($_GET['id']) && ctype_digit($_GET['id'])) $id = $_GET['id'];
       if (!$id) $this->redirect();
 
       $velo = $this->model->findById($id);
 
       if (!$velo) $this->redirect();
 
-      $modelUser = new User;
-
-      $author = $modelUser->findById($velo->getAuthor());
-
+      $author = $velo->getAuthor();
 
       $modelAvis = new Avis();
-      $avis =  $modelAvis->findAllByVelo($id);
+      $avis =  $modelAvis->findAllByVelo($velo);
       $pageTitle = $velo->getName();
 
       $this->render("velos/show", compact('pageTitle', 'velo', 'avis', 'author'));
    }
-
 
    /**
     * supprimer un velo par son ID et rediriger vers l'index des velos
@@ -112,8 +125,7 @@ class Velo extends AbstractController
 
    public function delete(): void
    {
-      $id = null;
-      if (!empty($_POST['id']) && ctype_digit($_POST['id'])) $id = $_POST['id'];
+      $id = $this->request->post('id');
 
       if (!$id) $this->redirect(["info" => "noId"]);
       $velo = $this->model->findById($id);
@@ -124,7 +136,6 @@ class Velo extends AbstractController
       $this->redirect(["info" => "deleted"]);
    }
 
-
    /**
     * editer un velo 
     * @return void
@@ -132,35 +143,30 @@ class Velo extends AbstractController
 
    public function edit(): void
    {
-      $id = null;
-      $name = null;
-      $description = null;
-      $price = null;
-
       // Valider le velo édité
       if ($_SERVER['REQUEST_METHOD'] === "POST") {
-         if (!empty($_POST['id']) && ctype_digit($_POST['id'])) $id = $_POST['id'];
-         if (!empty($_POST['name'])) $name = htmlspecialchars($_POST['name']);
-         if (!empty($_POST['description'])) $description = htmlspecialchars($_POST['description']);
-         if (!empty($_POST['price']) && ctype_digit($_POST['price'])) $price = $_POST['price'];
 
+         $id = $this->request->post('id');
+         $name = $this->request->post('name');
+         $description = $this->request->post('description');
+         $price = $this->request->post('price');
+         $image = $this->request->file("image");
 
-         if ($id && $name && $description && $price && !empty($_FILES['image'])) {
+         if ($id && $name && $description && $price && $image) {
 
             $file = new File("image");
             $file->upload();
 
             if (!$file->isImage()) $this->redirect(["action" => "show", "id" => $id]);
 
-            $velo = new ModelVelo();
+            $velo = $this->model->findById($id);
 
             $velo->setName($name);
             $velo->setDescription($description);
             $velo->setPrice($price);
             $velo->setImage($file->getNameFile());
 
-
-            $this->model->edit($id, $velo);
+            $this->model->edit($velo);
          }
 
          $this->redirect([
@@ -170,9 +176,8 @@ class Velo extends AbstractController
       }
 
       // Récuperer le velo à éditer
-      if (!empty($_GET['id']) && ctype_digit($_GET['id'])) {
-
-         $id = $_GET['id'];
+      $id = $this->request->get('id');
+      if ($id) {
          $velo = $this->model->findById($id);
 
          if (!$velo) $this->redirect();

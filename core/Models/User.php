@@ -2,6 +2,7 @@
 
 namespace Models;
 
+use App\Request;
 use Models\AbstractModel;
 
 class User extends AbstractModel
@@ -15,12 +16,11 @@ class User extends AbstractModel
    private $display_name;
 
    private \PDOStatement $statementCreateUser;
-   private \PDOStatement $statementGetOneUser;
    // private \PDOStatement $statementUpdateUser;
-   // private \PDOStatement $statementGetAllUser;
+   private \PDOStatement $statementGetOneUser;
    private \PDOStatement $statementSession;
-   private \PDOStatement $deleteStatementSession;
    private \PDOStatement $GetStatementSession;
+   private \PDOStatement $deleteStatementSession;
 
    function __construct()
    {
@@ -30,8 +30,8 @@ class User extends AbstractModel
       // $this->statementUpdateUser = $this->pdo->prepare("UPDATE $this->table SET username=:username, email=:email, password=:password WHERE id=:id");
       $this->statementGetOneUser = $this->pdo->prepare("SELECT * FROM $this->table WHERE username=:username");
       $this->statementSession = $this->pdo->prepare("INSERT INTO session VALUES (:id,:userid)");
-      $this->deleteStatementSession = $this->pdo->prepare("DELETE FROM session WHERE id=:id");
       $this->GetStatementSession = $this->pdo->prepare("SELECT * FROM session JOIN $this->table  on users.id=session.userid WHERE session.id=:id");
+      $this->deleteStatementSession = $this->pdo->prepare("DELETE FROM session WHERE id=:id");
    }
 
    public function getId(): ?int
@@ -79,7 +79,6 @@ class User extends AbstractModel
       $this->display_name = $display_name;
    }
 
-
    /**
     * creer un utilisateur
     * @param User $user
@@ -95,10 +94,7 @@ class User extends AbstractModel
          ':password' => $user->getPassword(),
          ':display_name' => $user->getDisplayName()
       ]);
-
-      // return $this->findById($this->pdo->lastInsertId());
    }
-
 
    /**
     * creer un utilisateur
@@ -130,8 +126,14 @@ class User extends AbstractModel
 
    static function findCurrentUser(): bool | User
    {
+
+      $request = new Request();
+
       $sessionId = $_COOKIE['session'] ?? '';
       $signature = $_COOKIE['signature'] ?? '';
+
+      $sessionId = $request->cookie('session');
+      $signature = $request->cookie('signature');
       if ($sessionId && $signature) {
          $hash = hash_hmac('sha256', $sessionId, 'majax');
          if (hash_equals($hash, $signature)) {
@@ -150,14 +152,4 @@ class User extends AbstractModel
       setcookie('session', "", time() - 1, '/');
       setcookie('signature', "", time() - 1, '/');
    }
-
-   // public function update(array $user): void
-   // {
-   //    $this->statementUpdateUser->bindValue(':username', $user['username']);
-   //    $this->statementUpdateUser->bindValue(':email', $user['email']);
-   //    $this->statementUpdateUser->bindValue(':password', $user['password']);
-   //    $this->statementUpdateUser->bindValue(':displayname', $user['displayname']);
-   //    $this->statementUpdateUser->bindValue(':id', $user['id']);
-   //    $this->statementUpdateUser->execute();
-   // }
 }

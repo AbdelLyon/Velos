@@ -2,7 +2,7 @@
 
 namespace Models;
 
-class Velo extends AbstractModel
+class Velo extends AbstractModel implements \JsonSerializable
 {
    protected string $table = "velos";
    private int $id;
@@ -57,9 +57,10 @@ class Velo extends AbstractModel
       $this->price = $price;
    }
 
-   public function getAuthor(): ?int
+   public function getAuthor(): ?User
    {
-      return $this->userid;
+      $modelUser = new User;
+      return $modelUser->findById($this->userid);
    }
 
    public function setAuthor(int $userid): void
@@ -74,15 +75,28 @@ class Velo extends AbstractModel
     * @return void
     */
 
-   public function edit(int $id, object $velo): void
+   public function edit(Velo $velo): void
    {
-      $statementEdit = $this->pdo->prepare("UPDATE $this->table SET name = :name, image = :image, description = :description, price = :price WHERE id = :velo_id");
+      $statementEdit = $this->pdo->prepare("UPDATE $this->table SET name = :name, image = :image, description = :description, price = :price WHERE id = :id");
       $statementEdit->execute([
-         "velo_id" => $id,
-         'name' => $velo->getName(),
-         'description' => $velo->getDescription(),
-         'image' => $velo->getImage(),
-         "price" => $velo->getPrice()
+         "id" => $velo->id,
+         'name' => $velo->name,
+         'description' => $velo->description,
+         'image' => $velo->image,
+         "price" => $velo->price
       ]);
+   }
+
+   public function jsonSerialize(): mixed
+   {
+      $model = new Avis();
+      $author = $model->findAllByVelo($this);
+      return [
+         "id" => $this->id,
+         "name" => $this->name,
+         "description" => $this->description,
+         "image" => $this->image,
+         "author" => $author
+      ];
    }
 }

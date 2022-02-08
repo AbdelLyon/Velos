@@ -2,10 +2,13 @@
 
 namespace Models;
 
+
 class AbstractModel
 {
    protected \PDO $pdo;
    protected string $table;
+   protected object $request;
+
 
    private \PDOStatement $statementFindAll;
    private \PDOStatement $statementFindById;
@@ -56,10 +59,10 @@ class AbstractModel
    /**
     * insérer un element dans la base de données
     * @param array $datas
-    * @param int $id
+    * @param object Velo
     */
 
-   public function insert(array $datas): int
+   public function insert(array $datas): object
    {
       $columns = array_keys($datas);
 
@@ -68,7 +71,6 @@ class AbstractModel
 
       $statementInsert  = $this->pdo->prepare($request);
       $statementInsert->execute($datas);
-
-      return $this->pdo->lastInsertId();
+      return $this->findById($this->pdo->lastInsertId());
    }
 }

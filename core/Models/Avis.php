@@ -2,7 +2,9 @@
 
 namespace Models;
 
-class Avis extends AbstractModel
+use JsonSerializable;
+
+class Avis extends AbstractModel implements JsonSerializable
 {
    protected string $table = "avis";
    private int $id;
@@ -47,14 +49,14 @@ class Avis extends AbstractModel
 
    /**
     * trouve tous les commentaires associés à un cocktail
-    * @param int $velo_id
+    * @param object
     * @return array|bool 
     */
 
-   public function findAllByVelo(int $veloId): array | bool
+   public function findAllByVelo(Velo $velo): array | bool
    {
       $requete = $this->pdo->prepare("SELECT * FROM $this->table WHERE velo_id = :velo_id");
-      $requete->execute(["velo_id" => $veloId]);
+      $requete->execute(["velo_id" => $velo->getId()]);
       return $requete->fetchAll(\PDO::FETCH_CLASS, get_class($this));
    }
 
@@ -65,13 +67,24 @@ class Avis extends AbstractModel
     * @return void
     */
 
-   public function edit(int $avisId, object $avis): void
+   public function edit(Avis $avis): void
    {
       $statementEdit = $this->pdo->prepare("UPDATE $this->table SET author = :author, content = :content WHERE id = :id");
       $statementEdit->execute([
          'author' => $avis->getAuthor(),
          'content' => $avis->getContent(),
-         "id" => $avisId
+         "id" => $avis->getId()
       ]);
+   }
+
+
+   public function jsonSerialize(): mixed
+   {
+      return [
+         "id" => $this->getId(),
+         "content" => $this->getContent(),
+         "author" => $this->getAuthor(),
+
+      ];
    }
 }

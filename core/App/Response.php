@@ -20,4 +20,11 @@ class Response
       header("Location: $url");
       exit();
    }
+
+
+   public static function json($response)
+   {
+      \header('Access-Control-Allow-Origin: *');
+      echo \json_encode($response);
+   }
 }

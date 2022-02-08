@@ -8,6 +8,7 @@ class User extends AbstractController
 {
    protected object $model;
    protected string $modelName = ModelUser::class;
+
    public string $error = '';
 
    /**
@@ -17,16 +18,13 @@ class User extends AbstractController
 
    public function signUp()
    {
-      $username = null;
-      $email = null;
-      $password = null;
-      $displayName = null;
-
       if ($_SERVER['REQUEST_METHOD'] === "POST") {
-         if (!empty($_POST['username']))  $username = htmlspecialchars($_POST['username']);
-         if (!empty($_POST['email'])) $email = htmlspecialchars($_POST['email']);
-         if (!empty($_POST['password'])) $password = htmlspecialchars($_POST['password']);
-         if (!empty($_POST['display_name'])) $displayName = htmlspecialchars($_POST['display_name']);
+
+         $username = $this->request->post('username');
+         $email = $this->request->post('email');
+         $password = $this->request->post('password');
+         $displayName = $this->request->post('display_name');
+
 
          if (!$username || !$email || !$password || !$displayName) {
             $this->error = 'Veuillez renseigner tous les champs!';
@@ -68,9 +66,8 @@ class User extends AbstractController
    public function signIn()
    {
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-         $username = null;
-         if (!empty($_POST['username'])) $username = $_POST['username'];
-         if (!empty($_POST['password'])) $password = $_POST['password'];
+         $username = $this->request->post('username');
+         $password = $this->request->post('password');
 
          if (!$username || !$password) {
             $this->error = 'Veuillez renseigner tous les champs!';
@@ -102,7 +99,8 @@ class User extends AbstractController
 
    public function signOut()
    {
-      $sessionId = $_COOKIE['session'] ?? '';
+      // $sessionId = $_COOKIE['session'] ?? '';
+      $sessionId = $this->request->cookie('session');
       if ($sessionId) $this->model->logout($sessionId);
 
       $this->redirect([
